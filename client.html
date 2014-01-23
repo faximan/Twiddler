@@ -15,12 +15,12 @@
 
       <!-- Login section -->
       <div class="content form" id="login">
-	<form name="login" action="#" onsubmit="return validateLoginForm()">
+	<form name="login" action="" onsubmit="return validateLoginForm()">
 	  <label>Email
-	    <input type="text" name="username" id="username" onkeypress="removeError(this)">
+	    <input type="text" name="username" id="username" onkeypress="removeError(this); clearLoginStatusMsg();">
 	  </label>
 	  <label>Password
-	    <input type="text" name="password" id="password" onkeypress="removeError(this)">
+	    <input type="text" name="password" id="password" onkeypress="removeError(this); clearLoginStatusMsg();">
 	  </label>
 	  <div class="status" id="loginStatus"></div>
 	  <input type="submit" value="Log in">
@@ -30,7 +30,7 @@
       <!-- Signup section -->
       <div class="content form" id="signup">
 	<h3>Sign up here</h3>
-	<form name="signup" action="#" onsubmit="return validateSignupForm()">
+	<form name="signup" action="" onsubmit="return validateSignupForm()">
 	  <label>First name
 	    <input type="text" name="firstname" id="firstname" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
@@ -62,7 +62,9 @@
     </script>
 
     <!-- Profile view -->
-    <script type="text/view" id="profileview">Profile view</script>
+    <script type="text/view" id="profileview">
+      <button onclick="logout();">Log out</button>
+    </script>
   </head>
 
   <body>

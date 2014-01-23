@@ -2,13 +2,23 @@ displayView = function(){
   // the code required to display a view
 };
 
-window.onload = function(){
+// Display the desired view HTML based on whether the user is logged
+// in or not.
+var setCurrentView = function(){
   var main_div = document.getElementById('mainContent');
-  var welcome_view = document.getElementById('welcomeview');
+  if (localStorage.token != "" && localStorage.token != undefined)
+    main_div.innerHTML = document.getElementById('profileview').innerHTML;
+  else
+    main_div.innerHTML = document.getElementById('welcomeview').innerHTML;
+};
 
-  // welcome_view is a <script> element, take all inner
-  // HTML content and insert into main div.
-  main_div.innerHTML = welcome_view.innerHTML;
+window.onload = function(){
+  setCurrentView();  // Decides whether to show welcome or profile view.
+};
+
+var logout = function(){
+  localStorage.token = "";
+  setCurrentView();
 };
 
 // Add red error border to element.
@@ -29,6 +39,11 @@ var clearSignupStatusMsg = function() {
   document.getElementById("signupStatus").innerText = "";
 }
 
+// Clears the status message of the login form.
+var clearLoginStatusMsg = function() {
+  document.getElementById("loginStatus").innerText = "";
+}
+
 // Add class "error" to all input fields that are empty in given form.
 var validateNonEmpty = function(form){
   var all_ok = true;
@@ -43,10 +58,25 @@ var validateNonEmpty = function(form){
 };
 
 var validateLoginForm = function(){
-  if (validateNonEmpty(document.forms["login"])) {
-    console.log("Login form seem to be ok!");
+  var form = document.forms["login"];
+  if (validateNonEmpty(form)) {
+    // Initiate login.
+    var user = form["username"];
+    var pwd = form["password"];
+    var result = serverstub.signIn(user.value, pwd.value);
+
+    if (result["success"] == false) {
+      // Wrong login details.
+      addError(user);
+      addError(pwd);
+      document.getElementById("loginStatus").innerText = result["message"];
+    } else {
+      var token = result["data"];
+      localStorage.token = token;  // Store token in HTML5 local storage.
+      setCurrentView();
+    }
   }
-  return false;
+  return false;  // No reload.
 };
 
 var validateSignupForm = function(){
@@ -87,7 +117,7 @@ var validateSignupForm = function(){
 
     // Check if user already exists.
     if (result["success"] == false) {
-      addError(document.getElementById("email"));
+      addError(email);
     } else {  // Signup succeeded. Clear all boxes.
       email.value = "";
       pwd1.value = "";
@@ -101,5 +131,5 @@ var validateSignupForm = function(){
     document.getElementById("signupStatus").innerText = result["message"];
   }
 
-  return false;
+  return false;  // No reload.
 };
