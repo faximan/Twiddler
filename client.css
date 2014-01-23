@@ -58,5 +58,6 @@ input {
 }
 
 div.status {
-    height: 25px;
+    display: inline-block;
+    width: 70%;
 }

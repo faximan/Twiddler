@@ -22,9 +22,8 @@
 	  <label>Password
 	    <input type="text" name="password" id="password" onkeypress="removeError(this)">
 	  </label>
-	  <div class="status">
-	    <input type="submit" value="Log in">
-	  </div>
+	  <div class="status" id="loginStatus"></div>
+	  <input type="submit" value="Log in">
 	</form>
       </div>
 
@@ -33,32 +32,31 @@
 	<h3>Sign up here</h3>
 	<form name="signup" action="#" onsubmit="return validateSignupForm()">
 	  <label>First name
-	    <input type="text" name="firstname" id="firstname" onkeypress="removeError(this)">
+	    <input type="text" name="firstname" id="firstname" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>Family name
-	    <input type="text" name="familyname" id="familyname" onkeypress="removeError(this)">
+	    <input type="text" name="familyname" id="familyname" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>Gender
-	    <input type="text" name="gender" id="gender" onkeypress="removeError(this)">
+	    <input type="text" name="gender" id="gender" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>City
-	    <input type="text" name="city" id="city" onkeypress="removeError(this)">
+	    <input type="text" name="city" id="city" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>Country
-	    <input type="text" name="country" id="country" onkeypress="removeError(this)">
+	    <input type="text" name="country" id="country" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>Email
-	    <input type="text" name="email" id="email" onkeypress="removeError(this)">
+	    <input type="text" name="email" id="email" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>Password
-	    <input type="text" name="password1" id="password1" onkeypress="removeError(this)">
+	    <input type="text" name="password1" id="password1" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
 	  <label>Repeat pwd
-	    <input type="text" name="password2" id="password2" onkeypress="removeError(this)">
+	    <input type="text" name="password2" id="password2" onkeypress="removeError(this); clearSignupStatusMsg();">
 	  </label>
-	  <div class="status">
-	    <input type="submit" value="Sign up">
-	  </div>
+	  <div class="status" id="signupStatus"></div>
+	  <input type="submit" value="Sign up">
 	</form>
       </div>
     </script>

@@ -24,6 +24,11 @@ var removeError = function(element){
   element.className = element.className.replace(" error", "");
 };
 
+// Clears the status message of the signup form.
+var clearSignupStatusMsg = function() {
+  document.getElementById("signupStatus").innerText = "";
+}
+
 // Add class "error" to all input fields that are empty in given form.
 var validateNonEmpty = function(form){
   var all_ok = true;
@@ -63,7 +68,37 @@ var validateSignupForm = function(){
   }
 
   if (all_ok) {
-    console.log("Signup form seems to be ok!");
+    // Initiate signup.
+    var email = form["email"];
+    var firstname = form["firstname"];
+    var familyname = form["familyname"];
+    var gender = form["gender"];
+    var city = form["city"];
+    var country = form["country"];
+
+    var result = serverstub.signUp({
+      "email": email.value,
+      "password": pwd1.value,
+      "firstname": firstname.value,
+      "familyname": familyname.value,
+      "gender": gender.value,
+      "city": city.value,
+      "country": country.value});
+
+    // Check if user already exists.
+    if (result["success"] == false) {
+      addError(document.getElementById("email"));
+    } else {  // Signup succeeded. Clear all boxes.
+      email.value = "";
+      pwd1.value = "";
+      pwd2.value = "";
+      firstname.value = "";
+      familyname.value = "";
+      gender.value = "";
+      city.value = "";
+      country.value = "";
+    }
+    document.getElementById("signupStatus").innerText = result["message"];
   }
 
   return false;
