@@ -14,6 +14,7 @@ h3 {
     text-align: center;
 }
 
+/* Welcome/login screen */
 div.content {
     background-color: white;
     border: 1px solid black;
@@ -60,4 +61,25 @@ input {
 div.status {
     display: inline-block;
     width: 70%;
+}
+
+
+/* Profile screen */
+div.tabSelector {
+    background-color: white;
+    width: 185px;
+    height: 50px;
+    margin-left: 5px;
+    margin-right: 5px;
+    text-align: center;
+    display: inline-block;
+    border: 1px solid black;
+    font-size:250%;
+}
+
+div.tab {
+    background-color: white;
+    margin-top: 5px;
+    width: 100%;
+    border: 1px solid black;
 }

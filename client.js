@@ -133,3 +133,34 @@ var validateSignupForm = function(){
 
   return false;  // No reload.
 };
+
+// Selects and displays the tab with the given name.
+var selectTab = function(tabName, tabSelectorName) {
+  // Change which tab to be visible.
+  var tabs = document.getElementById('tabs');
+  for (var i = 0; i < tabs.childNodes.length; i++) {
+    var child = tabs.childNodes[i];
+    if (child.className === "tab") {
+      // Show only current tab.
+      if (child.id == tabName) {
+	child.style.display = "block";
+      } else {
+	child.style.display = "none";
+      }
+    }
+  }
+
+  // Change color of tab selector accordingly.
+  var tabSels = document.getElementById('tabSelectors');
+  for (i = 0; i < tabSels.childNodes.length; i++) {
+    child = tabSels.childNodes[i];
+    if (child.className === "tabSelector") {
+      // Color the current tab selector.
+      if (child.id == tabSelectorName) {
+	child.style.backgroundColor = "red";
+      } else {
+	child.style.backgroundColor = "white";
+      }
+    }
+  }
+};

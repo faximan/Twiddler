@@ -63,7 +63,21 @@
 
     <!-- Profile view -->
     <script type="text/view" id="profileview">
-      <button onclick="logout();">Log out</button>
+      <button onclick="logout();">Log out</button> <br>
+
+      <!-- Tab selectors -->
+      <div id="tabSelectors">
+	<div class="tabSelector" id="homeTabSel" onclick="selectTab('homeTab', 'homeTabSel');" style="background-color: red;">Home</div>
+	<div class="tabSelector" id="browseTabSel" onclick="selectTab('browseTab', 'browseTabSel');">Browse</div>
+	<div class="tabSelector" id="accountTabSel" onclick="selectTab('accountTab', 'accountTabSel');">Account</div>
+      </div>
+
+      <!-- Tabs -->
+      <div id="tabs">
+	<div class="tab" id="homeTab" style="display: block;">Home</div>
+	<div class="tab" id="browseTab" style="display: none;">Browse</div>
+	<div class="tab" id="accountTab" style="display: none;">Account</div>
+      </div>
     </script>
   </head>
 
