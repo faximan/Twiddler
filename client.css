@@ -14,6 +14,15 @@ h3 {
     text-align: center;
 }
 
+h4 {
+    margin: 5px 5px 5px 5px;
+}
+
+button {
+    margin: 5px 5px 5px 5px;
+    float: right;
+}
+
 /* Welcome/login screen */
 div.content {
     background-color: white;
@@ -75,6 +84,7 @@ div.tabSelector {
     display: inline-block;
     border: 1px solid black;
     font-size:250%;
+    cursor: pointer;
 }
 
 div.tab {
@@ -82,4 +92,11 @@ div.tab {
     margin-top: 5px;
     width: 100%;
     border: 1px solid black;
+}
+
+div.divider {
+    width: 280px;
+    margin: 5px 5px 5px 5px;
+    display: inline-block;
+    vertical-align: bottom;
 }

@@ -16,11 +16,6 @@ window.onload = function(){
   setCurrentView();  // Decides whether to show welcome or profile view.
 };
 
-var logout = function(){
-  localStorage.token = "";
-  setCurrentView();
-};
-
 // Add red error border to element.
 var addError = function(element){
   // Remove current error to prevent adding it multiple times.
@@ -44,12 +39,19 @@ var clearLoginStatusMsg = function() {
   document.getElementById("loginStatus").innerText = "";
 }
 
+// Clears the status message of the change password form.
+var clearChangePwdStatusMsg = function() {
+  document.getElementById("changePwdStatus").innerText = "";
+}
+
 // Add class "error" to all input fields that are empty in given form.
 var validateNonEmpty = function(form){
   var all_ok = true;
   var inputFields = form.getElementsByTagName("input");
   for (var i = 0; i < inputFields.length; i++) {
-    if (inputFields[i].type == "text" && inputFields[i].value == "") {
+    if ( (inputFields[i].type == "text" ||
+          inputFields[i].type == "password") &&
+         inputFields[i].value == "") {
       addError(inputFields[i]);
       all_ok = false;
     }
@@ -76,26 +78,27 @@ var validateLoginForm = function(){
       setCurrentView();
     }
   }
-  return false;  // No reload.
 };
 
-var validateSignupForm = function(){
-  var form = document.forms["signup"];
-
-  var all_ok = validateNonEmpty(form);
-
-  // Make sure the two passwords are the same.
-  var pwd1 = form["password1"];
-  var pwd2 = form["password2"];
+// Ensures that both password fields are the same.
+var validatePassword = function(form, pwdId1, pwdId2){
+  var pwd1 = form[pwdId1];
+  var pwd2 = form[pwdId2];
 
   if (pwd1.value != pwd2.value) {
     addError(pwd1);
     addError(pwd2);
     pwd1.value = "";
     pwd2.value = "";
-
-    all_ok = false;
+    return false;
   }
+  return true;
+};
+
+var validateSignupForm = function(){
+  var form = document.forms["signup"];
+  var all_ok = validateNonEmpty(form) &&
+    validatePassword(form, "password1", "password2");
 
   if (all_ok) {
     // Initiate signup.
@@ -130,8 +133,6 @@ var validateSignupForm = function(){
     }
     document.getElementById("signupStatus").innerText = result["message"];
   }
-
-  return false;  // No reload.
 };
 
 // Selects and displays the tab with the given name.
@@ -143,9 +144,9 @@ var selectTab = function(tabName, tabSelectorName) {
     if (child.className === "tab") {
       // Show only current tab.
       if (child.id == tabName) {
-	child.style.display = "block";
+	      child.style.display = "block";
       } else {
-	child.style.display = "none";
+	      child.style.display = "none";
       }
     }
   }
@@ -157,10 +158,43 @@ var selectTab = function(tabName, tabSelectorName) {
     if (child.className === "tabSelector") {
       // Color the current tab selector.
       if (child.id == tabSelectorName) {
-	child.style.backgroundColor = "red";
+	      child.style.backgroundColor = "red";
       } else {
-	child.style.backgroundColor = "white";
+	      child.style.backgroundColor = "white";
       }
     }
+  }
+};
+
+// Sign out on server.
+var logout = function(){
+  var result = serverstub.signOut(localStorage.token);
+  if (result["success"] == false) {
+    alert("Error logging out: " + result["message"]);
+  } else {
+    localStorage.token = "";  // Remove token from local storage.
+    setCurrentView();
+  }
+};
+
+var changePwd = function(){
+  var form = document.forms["changepwd"];
+  var all_ok = validateNonEmpty(form) &&
+    validatePassword(form, "newpassword1", "newpassword2");
+
+  if (all_ok) {
+    // Initiate password change.
+    var result = serverstub.changePassword(localStorage.token, form["oldpwd"].value, form["newpassword1"].value);
+
+    // Show result of server call.
+    document.getElementById("changePwdStatus").innerText = result["message"];
+    if (result["success"] == false) {
+      addError(form["oldpwd"]);
+    }
+
+    // Clear all fields.
+    form["oldpwd"].value = "";
+    form["newpassword1"].value = "";
+    form["newpassword2"].value = "";
   }
 };
