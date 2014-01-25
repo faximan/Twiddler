@@ -6,6 +6,36 @@
     <script src="client.js" type="text/javascript"></script>
     <script src="serverstub.js" type="text/javascript"></script>
 
+    <!-- Main wall view, shared between Home and Browse tabs. -->
+    <script type="text/view" id="homebrowseview">
+      <div class="mainView">
+        <div class="postForm">
+          <form name="submitpost" action="" onsubmit="postMessage(); return false;">
+            <textarea name="postinput" rows="5" onkeypress="removeError(this);"></textarea>
+            <input type="submit" value="Post">
+          </form>
+          <button onclick="reloadWall();">Refresh wall</button>
+        </div>
+        <div id="wall"></div>
+      </div>
+
+      <!-- Sideview with user details -->
+      <div class="sideView">
+        <b>First name</b>
+        <div class="userInfo" id="userInfoFirst"></div>
+        <b>Family Name</b>
+        <div class="userInfo" id="userInfoFamily"></div>
+        <b>Gender</b>
+        <div class="userInfo" id="userInfoGender"></div>
+        <b>City</b>
+        <div class="userInfo" id="userInfoCity"></div>
+        <b>Country</b>
+        <div class="userInfo" id="userInfoCountry"></div>
+        <b>Email</b>
+        <div class="userInfo" id="userInfoEmail"></div>
+      </div>
+    </script>
+
     <!-- Welcome view -->
     <script type="text/view" id="welcomeview">
       <!-- Logo with slogan -->
@@ -65,19 +95,35 @@
     <script type="text/view" id="profileview">
       <!-- Tab selectors -->
       <div id="tabSelectors">
-	      <div class="tabSelector" id="homeTabSel" onclick="selectTab('homeTab', 'homeTabSel');" style="background-color: red;">Home</div>
-	      <div class="tabSelector" id="browseTabSel" onclick="selectTab('browseTab', 'browseTabSel');">Browse</div>
-	      <div class="tabSelector" id="accountTabSel" onclick="selectTab('accountTab', 'accountTabSel');">Account</div>
+	      <div class="tabSelector selectedTab" onclick="selectTab('homeTab', this);">Home</div>
+	      <div class="tabSelector" onclick="selectTab('browseTab', this);">Browse</div>
+	      <div class="tabSelector" onclick="selectTab('accountTab', this);">Account</div>
       </div>
 
       <!-- Tabs -->
       <div id="tabs">
-	      <div class="tab" id="homeTab" style="display: block;">Home</div>
-	      <div class="tab" id="browseTab" style="display: none;">Browse</div>
+	      <!-- Home tab -->
+        <div class="tab" id="homeTab" style="display: block;">
+          <div id="homeTabBody"></div>
+        </div>
+
+        <!-- Browse tab -->
+        <div class="tab" id="browseTab" style="display: none;">
+          <div class="wallHeader">
+            <form name="searchuser" action="" onsubmit="searchUser(); return false;">
+              <label>Find a user by email
+                <input type="text" size="50" name="searchemail" id="searchemail" onkeypress="removeError(this); clearSearchUserStatusMsg();">
+              </label>
+	            <div class="status" id="searchUserStatus"></div>
+              <input type="submit" value="Search">
+            </form>
+          </div>
+          <div id="browseTabBody"></div>
+        </div>
 
         <!-- Account tab -->
 	      <div class="tab" id="accountTab" style="display: none;">
-          <div class="divider">
+          <div class="mainView">
             <h4>Change password</h4>
             <form name="changepwd" action="" onsubmit="changePwd(); return false;">
               <label>Old password
@@ -93,9 +139,7 @@
               <input type="submit" value="Change">
             </form>
           </div>
-          <div class="divider">
-            <button onclick="logout();">Log out</button>
-          </div>
+          <br><button onclick="logout();">Log out</button>
         </div>
       </div>
     </script>

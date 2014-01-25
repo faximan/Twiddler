@@ -1,37 +1,30 @@
 
 body {
-    background-color: #E6E6FA;
+    background-color: #A1EEFF;
     width: 600px;
-    height: 400px;
     margin-top: 100px;
 
     /* Center horizontally */
     margin-left: auto;
     margin-right: auto;
+
+    font-family: "Arial", sans-serif;
 }
 
-h3 {
-    text-align: center;
-}
-
-h4 {
-    margin: 5px 5px 5px 5px;
-}
-
-button {
-    margin: 5px 5px 5px 5px;
-    float: right;
-}
-
-/* Welcome/login screen */
-div.content {
+div.content, div.tabSelector, div.tab {
     background-color: white;
     border: 1px solid black;
 }
 
+/* Welcome/login screen */
 div.form {
     width: 250px;
     float: right;
+}
+
+div.status {
+    width: 70%;
+    display: inline-block;
 }
 
 #logo {
@@ -49,13 +42,68 @@ div.form {
     margin-top: 6px;
 }
 
-form {
+/* Profile screen */
+div.tabSelector {
+    width: 185px;
+    height: 30px;
     margin-left: 5px;
     margin-right: 5px;
+    text-align: center;
+    display: inline-block;
+    font-size: 150%;
+    cursor: pointer;
 }
 
-.error {
-  border: 1px solid red;
+div.selectedTab {
+    background-color: #1FD6FF;
+}
+
+div.tab {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 70px;
+    overflow: auto;
+}
+
+div.sideView, div.mainView, div.Post, div.wallPost {
+    margin: 5px 5px 5px 5px;
+    display: inline-block;
+}
+
+div.sideView {
+    background-color: #EEEEEE;
+    width: 210px;
+    float: right;
+    padding: 5px 5px 5px 5px;
+}
+
+div.mainView {
+    width: 355px;
+}
+
+div.postForm {
+    margin-bottom: 20px;
+}
+
+div.wallPost {
+    border: 1px solid #EEEEEE;
+    display: block;
+    margin-bottom: 10px;
+    padding: 5px 5px 5px 5px;
+}
+
+div.userInfo {
+    margin-bottom: 8px;
+}
+
+
+/* Misc UI elements */
+h3 {
+    text-align: center;
+}
+
+h4, h4, button, div.wallHeader, form {
+    margin: 5px 5px 5px 5px;
 }
 
 label {
@@ -67,36 +115,10 @@ input {
     float: right;
 }
 
-div.status {
-    display: inline-block;
-    width: 70%;
+.error {
+    border: 1px solid red;
 }
 
-
-/* Profile screen */
-div.tabSelector {
-    background-color: white;
-    width: 185px;
-    height: 50px;
-    margin-left: 5px;
-    margin-right: 5px;
-    text-align: center;
-    display: inline-block;
-    border: 1px solid black;
-    font-size:250%;
-    cursor: pointer;
-}
-
-div.tab {
-    background-color: white;
-    margin-top: 5px;
+textarea {
     width: 100%;
-    border: 1px solid black;
-}
-
-div.divider {
-    width: 280px;
-    margin: 5px 5px 5px 5px;
-    display: inline-block;
-    vertical-align: bottom;
 }
