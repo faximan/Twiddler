@@ -1,11 +1,4 @@
 
-// The user the logged in user has searched for. This is used for state
-// keeping to ensure that the newest messages are loaded every time the
-// "Browse" view is opened and so that the HTML for showing user info
-// and the wall of messages can be shared between the Home and the Browse
-// tabs.
-var browsedUserActive = "";
-
 // The code required to display a view.
 displayView = function(){
   var main_div = document.getElementById('mainContent');
@@ -40,22 +33,22 @@ var removeError = function(element){
 // Clears the status message of the signup form.
 var clearSignupStatusMsg = function() {
   document.getElementById("signupStatus").innerText = "";
-}
+};
 
 // Clears the status message of the login form.
 var clearLoginStatusMsg = function() {
   document.getElementById("loginStatus").innerText = "";
-}
+};
 
 // Clears the status message of the change password form.
 var clearChangePwdStatusMsg = function() {
   document.getElementById("changePwdStatus").innerText = "";
-}
+};
 
 // Clears the status message of the search user form.
 var clearSearchUserStatusMsg = function() {
   document.getElementById("searchUserStatus").innerText = "";
-}
+};
 
 // Add class "error" to all input fields that are empty in passed in form.
 var validateNonEmpty = function(form){
@@ -194,6 +187,13 @@ var selectTab = function(tabName, tabSelector) {
   setupProfileView();
 };
 
+// The user the logged in user has searched for. This is used for state
+// keeping to ensure that the newest messages are loaded every time the
+// "Browse" view is opened and so that the HTML for showing user info
+// and the wall of messages can be shared between the Home and the Browse
+// tabs.
+var browsedUserActive = "";
+
 // Setup the profile view for the active tab. If the Browse tab is active
 // and no email is given, display the wall for the cached email in browsedUserActive.
 var setupProfileView = function(email){
@@ -232,7 +232,7 @@ var setupProfileView = function(email){
   document.getElementById("userInfoEmail").innerText = userData["email"];
 
   reloadWall();
-}
+};
 
 var reloadWall = function(){
   var email = document.getElementById("userInfoEmail").innerText;
@@ -253,7 +253,7 @@ var reloadWall = function(){
     post.innerHTML = "<b>" + posts[i]["writer"] + "</b><br>" + posts[i]["content"];
     wall.appendChild(post);
   }
-}
+};
 
 // Posts a message to the currently displayed user.
 var postMessage = function(){
@@ -272,7 +272,7 @@ var postMessage = function(){
   }
   reloadWall(email);
   message.value = "";  // Empty post textarea after successful post.
-}
+};
 
 var searchUser = function(){
   var form = document.forms["searchuser"];
@@ -282,7 +282,7 @@ var searchUser = function(){
 
   email = form["searchemail"].value;
   setupProfileView(email);
-}
+};
 
 // Sign out on server.
 var logout = function(){
