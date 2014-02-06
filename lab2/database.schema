@@ -1,0 +1,23 @@
+DROP TABLE users;
+DROP TABLE posts;
+
+CREATE TABLE users
+(
+email varchar(128) NOT NULL PRIMARY KEY,
+password varchar(128) NOT NULL,
+firstname varchar(128) NOT NULL,
+familyname varchar(128) NOT NULL,
+gender varchar(32) NOT NULL,
+city varchar(64) NOT NULL,
+country varchar(64) NOT NULL
+);
+
+CREATE TABLE posts
+(
+sender varchar(64) NOT NULL,
+receiver varchar(64) NOT NULL,
+body varchar(2048),
+timestamp datetime NOT NULL PRIMARY KEY DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (sender) REFERENCES users(email),
+FOREIGN KEY (receiver) REFERENCES users(email)
+);
