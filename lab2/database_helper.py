@@ -28,6 +28,12 @@ def get_user_for_email(db, email):
     cur.execute('SELECT * FROM users WHERE users.email=?', (email,))
     return cur.fetchone()
 
+# Updates the password for the given email
+def update_password(db, email, new_password):
+    cur = db.cursor()
+    cur.execute("UPDATE users SET password=? WHERE email=?", (new_password, email,))
+    db.commit()
+
 # Add a user to the database.
 def add_user_to_db(db, email, password, firstname, familyname, gender, city, country):
     t = (email, password, firstname, familyname, gender, city, country, )
@@ -36,5 +42,20 @@ def add_user_to_db(db, email, password, firstname, familyname, gender, city, cou
         cur.execute('INSERT INTO users VALUES(?,?,?,?,?,?,?)', t)
         db.commit()
     except sqlite3.Error as e:
-        return False  # User already exists? Empty values or wrong types?
+        return False  # User already exists
     return True
+
+# Fetches all posts with the given receiver
+def get_posts_for_email(db, receiver):
+    cur = db.cursor()
+    cur.execute('SELECT * FROM posts WHERE posts.receiver=?', (receiver,))
+    res = cur.fetchall()
+    print res;
+    return res
+
+# Add a post to the database
+def post_message_to_db(db, message, sender, receiver):
+    cur = db.cursor()
+    t = (sender, receiver, message,)
+    cur.execute('INSERT INTO posts ("sender", "receiver", "body") VALUES(?,?,?)', t)
+    db.commit()
