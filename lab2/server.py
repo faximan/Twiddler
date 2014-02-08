@@ -33,7 +33,7 @@ def response(success, message, data):
     return "SUCCESS: " + str(success) + ", MESSAGE: " + message + ", DATA: " + data;
 
 def email_for_token(token):
-    return active_users.get(token, default=None)
+    return active_users.get(token)
 
 # Returns true if the passed in token belongs to an active user.
 def is_logged_in(token):
@@ -67,9 +67,13 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 
 # Description: Signs out a user from the system.
 # Input: A string containing the access token of the user requesting to sign out.
-# Returned data:
+# Returned data: -
 def sign_out(token):
-    print 'sign out'
+    if not is_logged_in(token):
+        return response(False, "You don't seem to be logged in", "")
+    # Remove this user from the list of active users
+    del active_users[token]
+    return response(True, "You have successfully logged out", "")
 
 # Description: Changes the password of the current user to a new one.
 # Input:
@@ -143,6 +147,48 @@ def sign_up_handler():
     city = request.form['city']
     country = request.form['country']
     return sign_up(email, password, firstname, familyname, gender, city, country)
+
+@app.route('/sign_out', methods=['POST'])
+def sign_out_handler():
+    token = request.form['token']
+    return sign_out(token)
+
+@app.route('/change_password', methods=['POST'])
+def change_password_handler():
+    token = request.form['token']
+    new_password = request.form['new_password']
+    old_password = request.form['old_password']
+    return change_password(token, old_password, new_password)
+
+@app.route('/get_user_data_by_token', methods=['POST'])
+def get_user_data_by_token_handler():
+    token = request.form['token']
+    return get_user_data_by_token(token)
+
+@app.route('/get_user_data_by_email', methods=['POST'])
+def get_user_data_by_email_handler():
+    token = request.form['token']
+    email = request.form['email']
+    return get_user_data_by_email(token, email)
+
+@app.route('/get_user_messages_by_token', methods=['POST'])
+def get_user_messages_by_token_handler():
+    token = request.form['token']
+    return get_user_messages_by_token(token)
+
+@app.route('/get_user_messages_by_email', methods=['POST'])
+def get_user_messages_by_email_handler():
+    token = request.form['token']
+    email = request.form['email']
+    return get_user_messages_by_email(token, email)
+
+@app.route('/post_message', methods=['POST'])
+def post_message_handler():
+    token = request.form['token']
+    message = request.form['message']
+    email = request.form['email']
+    return post_message(token, message, email)
+
 # --------------------------------------------------------------
 
 # Start the Flask web server.
