@@ -1,5 +1,8 @@
 import sqlite3
-import uuid  # Token generator
+import uuid  # Token generator.
+from os import urandom  # Generating cryptographically secure password salts.
+import hashlib  # MD5 hasher
+import base64
 from flask import Flask, g, request
 from database_helper import *
 
@@ -69,6 +72,16 @@ def parse_posts(email):
         res.append(dict_from_row(post))
     return str(res)
 
+# ----------- Secure password storage helper functions -----------------
+# Never reuse salts. This is cryptographically secure. 'hash' is not.
+def generate_salt():
+    return base64.urlsafe_b64encode(urandom(32))
+
+# MD5 hashing
+def hash_password(password, salt):
+    hash_object = hashlib.md5(salt + password)
+    return hash_object.hexdigest()
+
 # ----------- Required functions from the lab skeleton -----------------
 # Description: Authenticates the username by the provided password.
 # Input: Two string values representing the username (email address) and password.
@@ -76,8 +89,10 @@ def parse_posts(email):
 def sign_in(username, password):
     user = get_user_for_email(get_db(), username)
     if user is None:
-        return response(False, "Unknown user", "")
-    elif password != user["password"]:
+        return response(False, "Wrong username/password", "")
+
+    hashed_password = hash_password(password, user["salt"])
+    if hashed_password != user["password"]:
         return response(False, "Wrong username/password", "")
     else:
         # Generate random access token and add to logged in users.
@@ -89,7 +104,11 @@ def sign_in(username, password):
 # Input: Seven string values representing the following: email, password, firstname, familyname, gender, city and country.
 # Returned data: -
 def sign_up(email, password, firstname, familyname, gender, city, country):
-    result = add_user_to_db(get_db(), email, password, firstname, familyname, gender, city, country)
+    # Hash passwords with salt to make them more secure. Never reuse salts.
+    salt = generate_salt()
+    hashed_password = hash_password(password, salt)
+
+    result = add_user_to_db(get_db(), email, hashed_password, salt, firstname, familyname, gender, city, country)
     if result == False:
         return response(False, "Error adding user to database. A user with that email probably exists already.", "");
     else:
@@ -116,9 +135,15 @@ def change_password(token, old_password, new_password):
         return response(False, "You don't seem to be logged in", "")
     email = email_for_token(token)
     user = get_user_for_email(get_db(), email)
-    if ( old_password != user["password"] ):
+
+    hashed_old_password = hash_password(old_password, user["salt"])
+    if ( hashed_old_password != user["password"] ):
         return response(False, "The old password is wrong", "")
-    update_password(get_db(), email, new_password)
+
+    # Hash the new password. Never reuse salt.
+    new_salt = generate_salt()
+    hashed_new_password = hash_password(new_password, new_salt)
+    update_password(get_db(), email, hashed_new_password, new_salt)
     return response(True, "Password updated", "")
 
 # Description: Retrieves the stored data for the user whom the passed token is issued for. The currently signed in user can use this method to retrieve all its own information from the server.

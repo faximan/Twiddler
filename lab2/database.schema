@@ -5,6 +5,7 @@ CREATE TABLE users
 (
 email varchar(128) NOT NULL PRIMARY KEY,
 password varchar(128) NOT NULL,
+salt varchar(128) NOT NULL,
 firstname varchar(128) NOT NULL,
 familyname varchar(128) NOT NULL,
 gender varchar(32) NOT NULL,

@@ -29,17 +29,17 @@ def get_user_for_email(db, email):
     return cur.fetchone()
 
 # Updates the password for the given email
-def update_password(db, email, new_password):
+def update_password(db, email, new_password, new_salt):
     cur = db.cursor()
-    cur.execute("UPDATE users SET password=? WHERE email=?", (new_password, email,))
+    cur.execute("UPDATE users SET password=?,salt=? WHERE email=?", (new_password, new_salt, email,))
     db.commit()
 
 # Add a user to the database.
-def add_user_to_db(db, email, password, firstname, familyname, gender, city, country):
-    t = (email, password, firstname, familyname, gender, city, country, )
+def add_user_to_db(db, email, password, salt, firstname, familyname, gender, city, country):
+    t = (email, password, salt, firstname, familyname, gender, city, country, )
     cur = db.cursor()
     try:
-        cur.execute('INSERT INTO users VALUES(?,?,?,?,?,?,?)', t)
+        cur.execute('INSERT INTO users VALUES(?,?,?,?,?,?,?,?)', t)
         db.commit()
     except sqlite3.Error as e:
         return False  # User already exists
