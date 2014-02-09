@@ -206,9 +206,9 @@ def sign_up_handler():
     country = request.form['country']
     return sign_up(email, password, firstname, familyname, gender, city, country)
 
-@app.route('/sign_out', methods=['POST'])
+@app.route('/sign_out', methods=['GET'])
 def sign_out_handler():
-    token = request.form['token']
+    token = request.args['token']
     return sign_out(token)
 
 @app.route('/change_password', methods=['POST'])
@@ -218,26 +218,26 @@ def change_password_handler():
     old_password = request.form['old_password']
     return change_password(token, old_password, new_password)
 
-@app.route('/get_user_data_by_token', methods=['POST'])
+@app.route('/get_user_data_by_token', methods=['GET'])
 def get_user_data_by_token_handler():
-    token = request.form['token']
+    token = request.args['token']
     return get_user_data_by_token(token)
 
-@app.route('/get_user_data_by_email', methods=['POST'])
+@app.route('/get_user_data_by_email', methods=['GET'])
 def get_user_data_by_email_handler():
-    token = request.form['token']
-    email = request.form['email']
+    token = request.args['token']
+    email = request.args['email']
     return get_user_data_by_email(token, email)
 
-@app.route('/get_user_messages_by_token', methods=['POST'])
+@app.route('/get_user_messages_by_token', methods=['GET'])
 def get_user_messages_by_token_handler():
-    token = request.form['token']
+    token = request.args['token']
     return get_user_messages_by_token(token)
 
-@app.route('/get_user_messages_by_email', methods=['POST'])
+@app.route('/get_user_messages_by_email', methods=['GET'])
 def get_user_messages_by_email_handler():
-    token = request.form['token']
-    email = request.form['email']
+    token = request.args['token']
+    email = request.args['email']
     return get_user_messages_by_email(token, email)
 
 @app.route('/post_message', methods=['POST'])
@@ -251,4 +251,4 @@ def post_message_handler():
 
 # Start the Flask web server.
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
