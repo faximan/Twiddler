@@ -1,3 +1,5 @@
+// The base url to the web server
+var server = "http://127.0.0.1:5000"
 
 // The code required to display a view.
 displayView = function(){
@@ -72,24 +74,32 @@ var validateNonEmpty = function(form){
   return all_ok;
 };
 
-var validateLoginForm = function(){
+var validateLoginForm = function() {
   var form = document.forms["login"];
   if (validateNonEmpty(form)) {
     // Initiate login.
     var user = form["username"];
     var pwd = form["password"];
-    var result = serverstub.signIn(user.value, pwd.value);
 
-    if (result["success"] == false) {
-      // Wrong login details.
-      addError(user);
-      addError(pwd);
-      document.getElementById("loginStatus").innerText = result["message"];
-    } else {
-      var token = result["data"];
-      localStorage.token = token;  // Store token in HTML5 local storage.
-      displayView();
-    }
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+        var result = JSON.parse(req.responseText);
+        if (result["SUCCESS"] == false) {
+          // Wrong login details.
+          addError(user);
+          addError(pwd);
+          document.getElementById("loginStatus").innerText = result["MESSAGE"];
+        } else {
+          var token = result["DATA"];
+          localStorage.token = token;  // Store token in HTML5 local storage.
+          displayView();
+        }
+      }
+    };
+    req.open("POST", server + "/sign_in", true);
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    req.send("username=" + user.value + "&password=" + pwd.value);
   }
 };
 
@@ -124,29 +134,31 @@ var validateSignupForm = function(){
     var password1 = form["password1"];
     var password2 = form["password2"];
 
-    var result = serverstub.signUp({
-      "email": email.value,
-      "password": password1.value,
-      "firstname": firstname.value,
-      "familyname": familyname.value,
-      "gender": gender.value,
-      "city": city.value,
-      "country": country.value});
-
-    // Check if user already exists.
-    if (result["success"] == false) {
-      addError(email);
-    } else {  // Signup succeeded. Clear all boxes.
-      email.value = "";
-      password1.value = "";
-      password2.value = "";
-      firstname.value = "";
-      familyname.value = "";
-      gender.value = "";
-      city.value = "";
-      country.value = "";
-    }
-    document.getElementById("signupStatus").innerText = result["message"];
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+        // Check if user already exists.
+        var result = JSON.parse(req.responseText);
+        if (result["SUCCESS"] == false) {
+          addError(email);
+        } else {  // Signup succeeded. Clear all boxes.
+          email.value = "";
+          password1.value = "";
+          password2.value = "";
+          firstname.value = "";
+          familyname.value = "";
+          gender.value = "";
+          city.value = "";
+          country.value = "";
+        }
+        document.getElementById("signupStatus").innerText = result["MESSAGE"];
+      }
+    };
+    req.open("POST", server + "/sign_up", true);
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    req.send("email=" + email.value + "&password=" + password1.value
+            + "&firstname=" + firstname.value + "&familyname=" + familyname.value
+            + "&gender=" + gender.value + "&city=" + city.value + "&country=" + country.value);
   }
 };
 
@@ -197,63 +209,82 @@ var browsedUserActive = "";
 // Setup the profile view for the active tab. If the Browse tab is active
 // and no email is given, display the wall for the cached email in browsedUserActive.
 var setupProfileView = function(email){
-  // Check which tab is active.
   var mainDiv, result;
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (req.readyState == 4 && req.status == 200) {
+      var result = JSON.parse(req.responseText);
+      // Clear out old data.
+      document.getElementById("homeTabBody").innerHTML = "";
+      document.getElementById("browseTabBody").innerHTML = "";
+
+      if (result["SUCCESS"] == false) {
+        // Set status message eg "No such user.".
+        document.getElementById("searchUserStatus").innerText = result["MESSAGE"];
+        return;
+      }
+
+      // Display user data in the side view.
+      mainDiv.innerHTML = document.getElementById("homebrowseview").innerHTML;
+      var userData = result["DATA"];
+      document.getElementById("userInfoFirst").innerText = userData["firstname"];
+      document.getElementById("userInfoFamily").innerText = userData["familyname"];
+      document.getElementById("userInfoGender").innerText = userData["gender"];
+      document.getElementById("userInfoCity").innerText = userData["city"];
+      document.getElementById("userInfoCountry").innerText = userData["country"];
+      document.getElementById("userInfoEmail").innerText = userData["email"];
+
+      reloadWall();
+    }
+  };
+
+  // Check which tab is active.
+  var url = "";
   if (document.getElementById("homeTab").style.display == "block") {
     mainDiv = document.getElementById("homeTabBody");
-    result = serverstub.getUserDataByToken(localStorage.token);
+    url = server + "/get_user_data_by_token?token=" + localStorage.token;
   } else if(document.getElementById("browseTab").style.display == "block") {
     mainDiv = document.getElementById("browseTabBody");
     if (email != undefined) browsedUserActive = email;
     if (browsedUserActive != undefined && browsedUserActive != "")
-      result = serverstub.getUserDataByEmail(localStorage.token, browsedUserActive);
+      url = server + "/get_user_data_by_email?token=" + localStorage.token
+      + "&email=" + browsedUserActive;
   }
-  else return;  // No tab with a main view active.
-
-  // Clear out old data.
-  document.getElementById("homeTabBody").innerHTML = "";
-  document.getElementById("browseTabBody").innerHTML = "";
-
-  if (result == undefined ) return;
-  if (result["success"] == false) {
-    // Set status message eg "No such user.".
-    document.getElementById("searchUserStatus").innerText = result["message"];
-    return;
+  if (url != "") {
+    req.open("GET", url, true);
+    req.send();  // Fetch the right profile view from the server.
   }
-
-  // Display user data in the side view.
-  mainDiv.innerHTML = document.getElementById("homebrowseview").innerHTML;
-  var userData = result["data"];
-  document.getElementById("userInfoFirst").innerText = userData["firstname"];
-  document.getElementById("userInfoFamily").innerText = userData["familyname"];
-  document.getElementById("userInfoGender").innerText = userData["gender"];
-  document.getElementById("userInfoCity").innerText = userData["city"];
-  document.getElementById("userInfoCountry").innerText = userData["country"];
-  document.getElementById("userInfoEmail").innerText = userData["email"];
-
-  reloadWall();
 };
 
 var reloadWall = function(){
   var email = document.getElementById("userInfoEmail").innerText;
-  var result = serverstub.getUserMessagesByEmail(localStorage.token, email);
-  if (result["success"] == false) {
-    alert("Error: " + result["message"]);
-    return;
-  }
-  var posts = result["data"];
-  var wall = document.getElementById("wall");
-  // Clear old posts.
-  wall.innerHTML = "";
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (req.readyState == 4 && req.status == 200) {
+      var result = JSON.parse(req.responseText);
+      if (result["SUCESS"] == false) {
+        alert(result["MESSAGE"]);
+        return;
+      }
+      var posts = result["DATA"];
+      var wall = document.getElementById("wall");
+      // Clear old posts.
+      wall.innerHTML = "";
 
-  // Iterate through the list and create visual post elements for every entry.
-  for (var i = 0; i < posts.length; i++) {
-    var post = document.createElement("div");
-    post.className = "wallPost";
-    post.innerHTML = "<b>" + posts[i]["writer"] + "</b><br>" + posts[i]["content"];
-    wall.appendChild(post);
-  }
+      // Iterate through the list and create visual post elements for every entry.
+      for (var i = 0; i < posts.length; i++) {
+        var post = document.createElement("div");
+        post.className = "wallPost";
+        post.innerHTML = "<b>" + posts[i]["sender"] + "</b><br>" + posts[i]["body"];
+        wall.appendChild(post);
+      }
+    }
+  };
+  req.open("GET", server + "/get_user_messages_by_email?token=" + localStorage.token
+           + "&email=" + email, true);
+  req.send();
 };
+
 
 // Posts a message to the currently displayed user.
 var postMessage = function(){
@@ -265,13 +296,21 @@ var postMessage = function(){
   var email = document.getElementById("userInfoEmail").innerText;
   var message = form["postinput"];
 
-  var result = serverstub.postMessage(localStorage.token, message.value, email);
-  if (result["success"] == false) {
-    alert("Error: " + result["message"]);
-    return;
-  }
-  reloadWall(email);
-  message.value = "";  // Empty post textarea after successful post.
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (req.readyState == 4 && req.status == 200) {
+      var result = JSON.parse(req.responseText);
+      if (result["SUCCESS"] == false) {
+        alert(result["MESSAGE"]);
+        return;
+      }
+      reloadWall(email);
+      message.value = "";  // Empty post textarea after successful post.
+    }
+  };
+  req.open("POST", server + "/post_message", true);
+  req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  req.send("token=" + localStorage.token + "&message=" + message.value + "&email=" + email);
 };
 
 var searchUser = function(){
@@ -285,15 +324,22 @@ var searchUser = function(){
 };
 
 // Sign out on server.
-var logout = function(){
-  var result = serverstub.signOut(localStorage.token);
-  if (result["success"] == false) {
-    alert("Error logging out: " + result["message"]);
-  } else {
-    localStorage.token = "";  // Remove token from local storage.
-    browsedUserActive = "";  // Browse tab should not be cached for the next user that logs in.
-    displayView();  // Switch back to Welcome view.
-  }
+var logout = function() {
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (req.readyState == 4 && req.status == 200) {
+      var result = JSON.parse(req.responseText);
+      if (result["SUCCESS"] == false) {
+        alert(result["message"]);
+      } else {
+        localStorage.token = "";  // Remove token from local storage.
+        browsedUserActive = "";  // Browse tab should not be cached for the next user that logs in.
+        displayView();  // Switch back to Welcome view.
+      }
+    }
+  };
+  req.open("GET", server + "/sign_out?token=" + localStorage.token, true);
+  req.send();
 };
 
 var changePwd = function(){
@@ -302,18 +348,27 @@ var changePwd = function(){
     validatePassword(form, "newpassword1", "newpassword2");
 
   if (all_ok) {
-    // Initiate password change.
-    var result = serverstub.changePassword(localStorage.token, form["oldpwd"].value, form["newpassword1"].value);
-
-    // Show result of server call.
-    document.getElementById("changePwdStatus").innerText = result["message"];
-    if (result["success"] == false) {
-      addError(form["oldpwd"]);
-    } else {
-      // Clear all fields after successful password change.
-      form["oldpwd"].value = "";
-      form["newpassword1"].value = "";
-      form["newpassword2"].value = "";
-    }
+    // Send server request for password change.
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+      if (req.readyState == 4 && req.status == 200) {
+        var result = JSON.parse(req.responseText);
+        // Show result of server call.
+        document.getElementById("changePwdStatus").innerText = result["MESSAGE"];
+        if (result["SUCCESS"] == false) {
+          addError(form["oldpwd"]);
+        } else {
+          // Clear all fields after successful password change.
+          form["oldpwd"].value = "";
+          form["newpassword1"].value = "";
+          form["newpassword2"].value = "";
+        }
+      }
+    };
+    req.open("POST", server + "/change_password", true);
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    req.send("token=" + localStorage.token
+             + "&old_password=" + form["oldpwd"].value
+             + "&new_password=" + form["newpassword1"].value);
   }
 };

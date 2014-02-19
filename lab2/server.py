@@ -3,6 +3,7 @@ import uuid  # Token generator.
 from os import urandom  # Generating cryptographically secure password salts.
 import hashlib  # MD5 hasher
 import base64
+import json
 from flask import Flask, g, request
 from database_helper import *
 
@@ -33,7 +34,7 @@ def close_db(error):
 # Returns a string in a human readable format for the given parameters.
 # Success is given as a bool, the other two as strings.
 def response(success, message, data):
-    return "SUCCESS: " + str(success) + ", MESSAGE: " + message + ", DATA: " + data;
+    return json.dumps({"SUCCESS" : success, "MESSAGE" : message, "DATA" : data})
 
 # Returns the email address for the given token assuming the token
 # corresponds to one of the active users (or None otherwise).
@@ -59,7 +60,7 @@ def parse_user(email):
 
     user_dict = dict_from_row(user)
     del user_dict["password"]
-    return str(user_dict)
+    return user_dict
 
 # Fetches all posts that have the given email as receiver.
 def parse_posts(email):
@@ -70,7 +71,7 @@ def parse_posts(email):
     # them to Python dictionaries to be able to reply to the client.
     for post in posts:
         res.append(dict_from_row(post))
-    return str(res)
+    return res
 
 # ----------- Secure password storage helper functions -----------------
 # Never reuse salts. This is cryptographically secure. 'hash' is not.
@@ -110,7 +111,7 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 
     result = add_user_to_db(get_db(), email, hashed_password, salt, firstname, familyname, gender, city, country)
     if result == False:
-        return response(False, "Error adding user to database. A user with that email probably exists already.", "");
+        return response(False, "That email is already in use.", "");
     else:
         return response(True, "Successfully added a new user", "")
 
@@ -210,14 +211,14 @@ def post_message(token, message, email):
 
 # ----------------  Handlers for different URL's ------------------------
 # Entry point to the webpage. Should return index.html?
-@app.route("/")
+@app.route('/', methods=['GET'])
 def hello():
-    return request.environ.get('SERVER_PROTOCOL')
+    return "Twiddler"
 
 @app.route('/sign_in', methods=['POST'])
 def sign_in_handler():
-    username = request.form['username']
     password = request.form['password']
+    username = request.form['username']
     return sign_in(username, password)
 
 @app.route('/sign_up', methods=['POST'])
@@ -273,6 +274,15 @@ def post_message_handler():
     return post_message(token, message, email)
 
 # --------------------------------------------------------------
+
+# CORS!
+@app.after_request
+def after(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'POST, GET')
+    response.headers.add('Access-Control-Allow-Headers', 'X-Requested-With')
+    response.headers.add('Access-Control-Max-Age', '1728000')
+    return response
 
 # Start the Flask web server.
 if __name__ == "__main__":
