@@ -1,4 +1,11 @@
+database.db
 .DS_Store
 .#*
 *.db
 *.pyc
+bin/
+lib/
+include/
+lab2/bin/
+lab2/lib
+lab2/include/
