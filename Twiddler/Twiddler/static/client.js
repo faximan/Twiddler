@@ -118,7 +118,7 @@ var validatePassword = function(form, pwdId1, pwdId2){
   return true;
 };
 
-var validateSignupForm = function(){
+var validateSignupForm = function() {
   var form = document.forms["signup"];
   var all_ok = validateNonEmpty(form) &&
     validatePassword(form, "password1", "password2");
@@ -287,7 +287,7 @@ var reloadWall = function(){
 
 
 // Posts a message to the currently displayed user.
-var postMessage = function(){
+var postMsg = function() {
   var form = document.forms["submitpost"];
   if (!validateNonEmpty(form)) {
     return;

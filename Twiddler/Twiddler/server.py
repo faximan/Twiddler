@@ -1,13 +1,14 @@
+from flask import g, request, render_template
 import sqlite3
 import uuid  # Token generator.
 from os import urandom  # Generating cryptographically secure password salts.
 import hashlib  # MD5 hasher
 import base64
 import json
-from flask import Flask, g, request
 from database_helper import *
 
-app = Flask(__name__)
+# The app object created in __init__.py
+from Twiddler import app
 
 # The tokens of the currently logged in users. Maps from token to email.
 active_users = {}
@@ -213,7 +214,7 @@ def post_message(token, message, email):
 # Entry point to the webpage. Should return index.html?
 @app.route('/', methods=['GET'])
 def hello():
-    return "Twiddler"
+    return app.send_static_file("client.html")
 
 @app.route('/sign_in', methods=['POST'])
 def sign_in_handler():
@@ -272,18 +273,3 @@ def post_message_handler():
     message = request.form['message']
     email = request.form['email']
     return post_message(token, message, email)
-
-# --------------------------------------------------------------
-
-# CORS!
-@app.after_request
-def after(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Methods', 'POST, GET')
-    response.headers.add('Access-Control-Allow-Headers', 'X-Requested-With')
-    response.headers.add('Access-Control-Max-Age', '1728000')
-    return response
-
-# Start the Flask web server.
-if __name__ == "__main__":
-    app.run(debug=True)
