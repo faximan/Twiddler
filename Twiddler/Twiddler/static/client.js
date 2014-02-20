@@ -1,6 +1,3 @@
-// The base url to the web server
-var server = "http://127.0.0.1:5000"
-
 // The code required to display a view.
 displayView = function(){
   var main_div = document.getElementById('mainContent');
@@ -94,10 +91,14 @@ var validateLoginForm = function() {
           var token = result["DATA"];
           localStorage.token = token;  // Store token in HTML5 local storage.
           displayView();
+
+          // Open a websocket connection so that messages can be sent to the client
+          // without having to poll.
+          setupWebsocket(token);
         }
       }
     };
-    req.open("POST", server + "/sign_in", true);
+    req.open("POST", "/sign_in", true);
     req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     req.send("username=" + user.value + "&password=" + pwd.value);
   }
@@ -154,7 +155,7 @@ var validateSignupForm = function() {
         document.getElementById("signupStatus").innerText = result["MESSAGE"];
       }
     };
-    req.open("POST", server + "/sign_up", true);
+    req.open("POST", "/sign_up", true);
     req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     req.send("email=" + email.value + "&password=" + password1.value
             + "&firstname=" + firstname.value + "&familyname=" + familyname.value
@@ -242,18 +243,43 @@ var setupProfileView = function(email){
   var url = "";
   if (document.getElementById("homeTab").style.display == "block") {
     mainDiv = document.getElementById("homeTabBody");
-    url = server + "/get_user_data_by_token?token=" + localStorage.token;
+    url = "/get_user_data_by_token?token=" + localStorage.token;
   } else if(document.getElementById("browseTab").style.display == "block") {
     mainDiv = document.getElementById("browseTabBody");
     if (email != undefined) browsedUserActive = email;
     if (browsedUserActive != undefined && browsedUserActive != "")
-      url = server + "/get_user_data_by_email?token=" + localStorage.token
+      url = "/get_user_data_by_email?token=" + localStorage.token
       + "&email=" + browsedUserActive;
   }
   if (url != "") {
     req.open("GET", url, true);
     req.send();  // Fetch the right profile view from the server.
   }
+};
+
+var setupWebsocket = function(token) {
+  var ws = new WebSocket("ws://" + document.domain + ":5000/websocket?token=" + token);
+  ws.onmessage = function (event) {
+    console.log("Websocket onmessage: " + event.data);
+    var wall = document.getElementById("wall");
+    appendPostToWall(wall, JSON.parse(event.data));
+  };
+  ws.onopen = function() {
+    console.log("Websocket open");
+  };
+  ws.onerror = function(error) {
+    console.log('WebSocket Error: ' + error);
+  };
+  ws.onclose = function() {
+    console.log('WebSocket close');
+  };
+};
+
+var appendPostToWall = function(wall, postJson) {
+  var post = document.createElement("div");
+  post.className = "wallPost";
+  post.innerHTML = "<b>" + postJson["sender"] + "</b><br>" + postJson["body"];
+  wall.appendChild(post);
 };
 
 var reloadWall = function(){
@@ -273,14 +299,11 @@ var reloadWall = function(){
 
       // Iterate through the list and create visual post elements for every entry.
       for (var i = 0; i < posts.length; i++) {
-        var post = document.createElement("div");
-        post.className = "wallPost";
-        post.innerHTML = "<b>" + posts[i]["sender"] + "</b><br>" + posts[i]["body"];
-        wall.appendChild(post);
+        appendPostToWall(wall, posts[i]);
       }
     }
   };
-  req.open("GET", server + "/get_user_messages_by_email?token=" + localStorage.token
+  req.open("GET", "/get_user_messages_by_email?token=" + localStorage.token
            + "&email=" + email, true);
   req.send();
 };
@@ -308,7 +331,7 @@ var postMsg = function() {
       message.value = "";  // Empty post textarea after successful post.
     }
   };
-  req.open("POST", server + "/post_message", true);
+  req.open("POST", "/post_message", true);
   req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   req.send("token=" + localStorage.token + "&message=" + message.value + "&email=" + email);
 };
@@ -338,7 +361,7 @@ var logout = function() {
       }
     }
   };
-  req.open("GET", server + "/sign_out?token=" + localStorage.token, true);
+  req.open("GET", "/sign_out?token=" + localStorage.token, true);
   req.send();
 };
 
@@ -365,7 +388,7 @@ var changePwd = function(){
         }
       }
     };
-    req.open("POST", server + "/change_password", true);
+    req.open("POST", "/change_password", true);
     req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     req.send("token=" + localStorage.token
              + "&old_password=" + form["oldpwd"].value

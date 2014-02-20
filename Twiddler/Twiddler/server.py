@@ -13,6 +13,9 @@ from Twiddler import app
 # The tokens of the currently logged in users. Maps from token to email.
 active_users = {}
 
+# Maps from email to active websocket.
+active_websockets = {}
+
 # Opens the connection to our database on file.
 def connect_db():
     db = sqlite3.connect(DATABASE)
@@ -122,6 +125,11 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 def sign_out(token):
     if not is_logged_in(token):
         return response(False, "You don't seem to be logged in", "")
+    # Delete (close) web socket.
+    ws = active_websockets[email_for_token(token)]
+    if ws:
+        ws.close()
+
     # Remove this user from the list of active users
     del active_users[token]
     return response(True, "You have successfully logged out", "")
@@ -205,7 +213,14 @@ def post_message(token, message, email):
         return response(False, "You don't seem to be logged in", "")
     if get_user_for_email(get_db(), email) is None:
         return response(False, "Recipient not found", "")
-    post_message_to_db(get_db(), message, email_for_token(token), email)
+    sender = email_for_token(token)
+    post_message_to_db(get_db(), message, sender, email)
+
+    # Tell the receiver that he/she has a new message via websockets
+    ws = active_websockets.get(email)
+    if ws:
+        post = {"sender" : sender, "body" : message}
+        ws.send(json.dumps(post))
     return response(True, "Successfully posted a message", "")
 
 # -----------------------------------------------------------------------
@@ -273,3 +288,22 @@ def post_message_handler():
     message = request.form['message']
     email = request.form['email']
     return post_message(token, message, email)
+
+@app.route('/websocket', methods=['GET'])
+def websocket_handler():
+    if request.environ.get('wsgi.websocket'):
+        ws = request.environ['wsgi.websocket']
+        token = request.args['token']
+
+        # Store the websocket in our dictionary mapping email to socket.
+        email = email_for_token(token)
+        active_websockets[email] = ws
+
+        # Works as echo server for messages sent by the client.
+        while True:
+            if ws.closed:
+                break
+            msg = ws.receive()
+            ws.send(msg)  # echo back messages
+        del active_websockets[email]
+    return

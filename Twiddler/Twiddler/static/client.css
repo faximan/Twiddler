@@ -65,7 +65,7 @@ div.tab {
     overflow: auto;
 }
 
-div.sideView, div.mainView, div.Post, div.wallPost {
+div.sideView, div.mainView, div.Post {
     margin: 5px 5px 5px 5px;
     display: inline-block;
 }
@@ -88,7 +88,7 @@ div.postForm {
 div.wallPost {
     border: 1px solid #EEEEEE;
     display: block;
-    margin-bottom: 10px;
+    margin: 30px 5px 10px 5px;
     padding: 5px 5px 5px 5px;
 }
 
