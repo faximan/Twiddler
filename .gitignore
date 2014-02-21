@@ -8,3 +8,4 @@ lib/
 include/
 gevent/
 .Python
+etc/
